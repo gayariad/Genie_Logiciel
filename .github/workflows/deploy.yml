@@ -1,0 +1,25 @@
+name: Deploy
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Deploy to VM via SSH
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            set -e
+            cd ${{ secrets.VM_APP_DIR }}
+            git pull origin main
+            npm ci
+            npm run build
+            pm2 reload cinema-bi || (PORT=3000 pm2 start .output/server/index.mjs --name cinema-bi --interpreter node)
+            pm2 save
+            sudo systemctl reload nginx
