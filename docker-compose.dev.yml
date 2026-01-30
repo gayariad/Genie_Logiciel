@@ -1,32 +1,38 @@
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile.dev
-    container_name: cinema-bi-app
+    image: node:20
+    working_dir: /app
+    volumes:
+      - ./:/app
     ports:
       - "3000:3000"
-    volumes:
-      - .:/app
-      - /app/node_modules
-    env_file:
-      - .env
+    environment:
+      NODE_ENV: development
+      DATABASE_URL: mysql://dev_user:dev_pass@db:3306/cinema_bi_dev
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 3000"
     depends_on:
       - db
 
   db:
     image: mysql:8.4
-    container_name: cinema-bi-db
-    restart: unless-stopped
     environment:
-      MYSQL_DATABASE: cinema_dev
-      MYSQL_USER: app
-      MYSQL_PASSWORD: app
-      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cinema_bi_dev
+      MYSQL_USER: dev_user
+      MYSQL_PASSWORD: dev_pass
+      MYSQL_ROOT_PASSWORD: rootpass
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
-      - mysql_dev:/var/lib/mysql
+      - mysql_dev_data:/var/lib/mysql
+
+  phpmyadmin:
+    image: phpmyadmin:5
+    environment:
+      PMA_HOST: db
+    ports:
+      - "8080:80"
+    depends_on:
+      - db
 
 volumes:
-  mysql_dev:
+  mysql_dev_data:
