@@ -1,5 +1,7 @@
 services:
   app:
+    env_file:
+      - .env
     image: node:20
     working_dir: /app
     volumes:
