@@ -1,7 +1,21 @@
 <template>
-  <div class="relative min-h-screen bg-animated-red text-white overflow-x-hidden">
+  <div class="relative h-screen bg-animated-red text-white overflow-hidden flex flex-col">
+    <div
+      class="absolute inset-0 pointer-events-none overflow-hidden transition-opacity duration-700 ease-out"
+      :class="heroBgEnabled ? 'opacity-100' : 'opacity-0'"
+    >
+      <Transition name="hero-bg-fade">
+        <div
+          v-if="heroBgImage"
+          :key="`hero-bg-${heroBgFrameKey}`"
+          class="absolute inset-0 hero-bg-image-layer"
+          :style="{ backgroundImage: `url('${heroBgImage}')` }"
+        />
+      </Transition>
+    </div>
+
     <!-- Header -->
-    <header class="flex items-center justify-between px-8 py-5">
+    <header class="relative z-10 flex items-center justify-between px-8 py-5 shrink-0">
       <!-- Logo placeholder -->
       <div class="flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2">
@@ -48,11 +62,33 @@
     </nav>
 
     <!-- Contenu principal -->
-    <main class="pl-24 pr-8 pb-8 overflow-y-auto">
+    <main class="relative z-10 pl-24 pr-8 pb-8 overflow-y-auto flex-1 min-h-0 snap-y snap-mandatory scroll-smooth">
       <slot />
     </main>
   </div>
 </template>
 
 <script setup lang="ts">
+const heroBgEnabled = useState<boolean>('dashboard-hero-bg-enabled', () => false)
+const heroBgImage = useState<string>('dashboard-hero-bg-image', () => '')
+const heroBgFrameKey = useState<number>('dashboard-hero-bg-frame-key', () => 0)
 </script>
+
+<style scoped>
+.hero-bg-fade-enter-active,
+.hero-bg-fade-leave-active {
+  transition: opacity 850ms ease;
+}
+
+.hero-bg-fade-enter-from,
+.hero-bg-fade-leave-to {
+  opacity: 0;
+}
+
+.hero-bg-image-layer {
+  background-size: cover;
+  background-position: center;
+  transform: scale(1.16);
+  filter: blur(58px) saturate(1.15);
+}
+</style>
