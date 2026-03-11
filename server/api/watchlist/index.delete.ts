@@ -4,8 +4,8 @@ export default defineEventHandler(async (event) => {
     throw createError({ statusCode: 401, statusMessage: 'Vous devez être connecté' })
   }
 
-  const body = await readBody(event)
-  const { filmId } = body
+  const query = getQuery(event)
+  const filmId = Number(query.filmId)
 
   if (!filmId || !Number.isInteger(filmId)) {
     throw createError({ statusCode: 400, statusMessage: 'ID de film invalide' })

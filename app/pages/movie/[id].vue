@@ -127,9 +127,8 @@ async function toggleFavoris() {
   togglingFavoris.value = true
   try {
     if (favorisStatus.value?.isFavorite) {
-      await $fetch('/api/favoris', {
+      await $fetch(`/api/favoris?filmId=${parseInt(movieId)}`, {
         method: 'DELETE',
-        body: { filmId: parseInt(movieId) },
       })
     } else {
       await $fetch('/api/favoris', {
@@ -154,9 +153,8 @@ async function toggleWatchlist() {
   togglingWatchlist.value = true
   try {
     if (watchlistStatus.value?.isInWatchlist) {
-      await $fetch('/api/watchlist', {
+      await $fetch(`/api/watchlist?filmId=${parseInt(movieId)}`, {
         method: 'DELETE',
-        body: { filmId: parseInt(movieId) },
       })
     } else {
       await $fetch('/api/watchlist', {
