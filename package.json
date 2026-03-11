@@ -10,7 +10,10 @@
     "postinstall": "nuxt prepare"
   },
   "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "mysql2": "^3.19.1",
     "nuxt": "^4.3.0",
+    "nuxt-auth-utils": "^0.5.29",
     "vue": "^3.5.27",
     "vue-router": "^4.6.4"
   },

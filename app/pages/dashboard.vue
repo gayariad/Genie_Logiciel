@@ -213,9 +213,12 @@ watch(
               </div>
             </Transition>
 
-            <button class="mt-5 self-end glass glass-btn glass-red text-white">
-              Noter ce film
-            </button>
+            <NuxtLink
+              :to="`/movie/${currentHero?.id}`"
+              class="mt-5 self-end glass glass-btn glass-red text-white inline-block"
+            >
+              Voir les détails
+            </NuxtLink>
           </div>
 
           <!-- Carousel indicators -->
@@ -234,10 +237,11 @@ watch(
       <!-- Cards grid -->
       <section class="min-h-full snap-start snap-stop-always flex items-center py-8">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full">
-          <div
+          <NuxtLink
             v-for="(card, idx) in featureCards"
             :key="idx"
-            class="relative h-64 rounded-3xl overflow-hidden group cursor-pointer glass glass-panel glass-red"
+            :to="`/movie/${card.id}`"
+            class="relative h-64 rounded-3xl overflow-hidden group cursor-pointer glass glass-panel glass-red block"
           >
             <img
               v-if="tmdbImg(card, 'w1280')"
@@ -255,14 +259,14 @@ watch(
               <p class="text-xs text-white/70 leading-relaxed mb-3 line-clamp-2">
                 {{ cardDescription(idx, card) }}
               </p>
-              <button class="self-start flex items-center gap-2 glass glass-btn glass-red text-white">
+              <span class="self-start flex items-center gap-2 glass glass-btn glass-red text-white">
                 {{ cardCta(idx) }}
                 <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
                   <path stroke-linecap="round" stroke-linejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
                 </svg>
-              </button>
+              </span>
             </div>
-          </div>
+          </NuxtLink>
         </div>
       </section>
     </template>
