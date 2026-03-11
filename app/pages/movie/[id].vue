@@ -106,13 +106,13 @@ const { data: avisData, refresh: refreshAvis } = await useFetch<AvisDB[]>(`/api/
 })
 
 // ── Favoris et Watchlist ──
-const { data: favorisStatus, refresh: refreshFavoris } = await useFetch<{ isFavorite: boolean }>(
+const { data: favorisStatus, refresh: refreshFavoris } = useFetch<{ isFavorite: boolean }>(
   `/api/favoris/${movieId}`,
-  { default: () => ({ isFavorite: false }) }
+  { default: () => ({ isFavorite: false }), server: false }
 )
-const { data: watchlistStatus, refresh: refreshWatchlist } = await useFetch<{ isInWatchlist: boolean }>(
+const { data: watchlistStatus, refresh: refreshWatchlist } = useFetch<{ isInWatchlist: boolean }>(
   `/api/watchlist/${movieId}`,
-  { default: () => ({ isInWatchlist: false }) }
+  { default: () => ({ isInWatchlist: false }), server: false }
 )
 
 const togglingFavoris = ref(false)
