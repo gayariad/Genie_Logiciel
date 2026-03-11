@@ -1,5 +1,5 @@
 <template>
-  <div class="relative h-screen bg-animated-red text-white overflow-hidden flex flex-col">
+  <div class="relative h-screen text-white overflow-hidden flex flex-col" :class="hideHeader ? 'bg-[#1a0000]' : 'bg-animated-red'">
     <div
       class="absolute inset-0 pointer-events-none overflow-hidden transition-opacity duration-700 ease-out"
       :class="heroBgEnabled ? 'opacity-100' : 'opacity-0'"
@@ -15,7 +15,7 @@
     </div>
 
     <!-- Header -->
-    <header class="relative z-10 flex items-center justify-between px-8 py-5 shrink-0">
+    <header v-if="!hideHeader" class="relative z-10 flex items-center justify-between px-8 py-5 shrink-0">
       <!-- Logo placeholder -->
       <div class="flex items-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.2">
@@ -23,21 +23,38 @@
         </svg>
       </div>
       <span class="text-sm font-medium tracking-widest uppercase text-white/40">movie analytics</span>
+
+      <!-- Auth status -->
+      <div class="flex items-center gap-3">
+        <template v-if="loggedIn">
+          <NuxtLink to="/profil" class="flex items-center gap-2 glass glass-pill px-4 py-1.5 text-sm text-white/60 hover:text-white transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0z" />
+            </svg>
+            {{ user?.pseudo }}
+          </NuxtLink>
+        </template>
+        <template v-else>
+          <NuxtLink to="/login" class="glass glass-pill px-4 py-1.5 text-sm text-white/60 hover:text-white transition-colors">
+            Connexion
+          </NuxtLink>
+        </template>
+      </div>
     </header>
 
     <!-- Sidebar flottante centrée verticalement — liquid glass -->
     <nav class="fixed left-5 top-1/2 -translate-y-1/2 z-40 flex flex-col items-center gap-3 py-5 px-3 w-16 glass glass-sidebar">
-      <div class="sidebar-icon" title="Dashboard">
+      <NuxtLink to="/dashboard" class="sidebar-icon" title="Dashboard">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-4 0a1 1 0 01-1-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 01-1 1h-2z" />
         </svg>
-      </div>
+      </NuxtLink>
 
-      <div class="sidebar-icon" title="Profil">
+      <NuxtLink :to="loggedIn ? '/profil' : '/login'" class="sidebar-icon" title="Profil">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
           <path stroke-linecap="round" stroke-linejoin="round" d="M5.121 17.804A13.937 13.937 0 0112 16c2.5 0 4.847.655 6.879 1.804M15 10a3 3 0 11-6 0 3 3 0 016 0zm6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
-      </div>
+      </NuxtLink>
 
       <div class="sidebar-icon" title="WatchList">
         <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -79,6 +96,9 @@
 const heroBgEnabled = useState<boolean>('dashboard-hero-bg-enabled', () => false)
 const heroBgImage = useState<string>('dashboard-hero-bg-image', () => '')
 const heroBgFrameKey = useState<number>('dashboard-hero-bg-frame-key', () => 0)
+const hideHeader = useState<boolean>('layout-hide-header', () => false)
+
+const { loggedIn, user } = useUserSession()
 </script>
 
 <style scoped>
