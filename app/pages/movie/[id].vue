@@ -105,6 +105,73 @@ const { data: avisData, refresh: refreshAvis } = await useFetch<AvisDB[]>(`/api/
   default: () => [],
 })
 
+// ── Favoris et Watchlist ──
+const { data: favorisStatus, refresh: refreshFavoris } = await useFetch<{ isFavorite: boolean }>(
+  `/api/favoris/${movieId}`,
+  { default: () => ({ isFavorite: false }) }
+)
+const { data: watchlistStatus, refresh: refreshWatchlist } = await useFetch<{ isInWatchlist: boolean }>(
+  `/api/watchlist/${movieId}`,
+  { default: () => ({ isInWatchlist: false }) }
+)
+
+const togglingFavoris = ref(false)
+const togglingWatchlist = ref(false)
+
+async function toggleFavoris() {
+  if (!loggedIn.value) {
+    navigateTo('/login')
+    return
+  }
+
+  togglingFavoris.value = true
+  try {
+    if (favorisStatus.value?.isFavorite) {
+      await $fetch('/api/favoris', {
+        method: 'DELETE',
+        body: { filmId: parseInt(movieId) },
+      })
+    } else {
+      await $fetch('/api/favoris', {
+        method: 'POST',
+        body: { filmId: parseInt(movieId) },
+      })
+    }
+    await refreshFavoris()
+  } catch (e) {
+    console.error('Erreur lors de la gestion des favoris', e)
+  } finally {
+    togglingFavoris.value = false
+  }
+}
+
+async function toggleWatchlist() {
+  if (!loggedIn.value) {
+    navigateTo('/login')
+    return
+  }
+
+  togglingWatchlist.value = true
+  try {
+    if (watchlistStatus.value?.isInWatchlist) {
+      await $fetch('/api/watchlist', {
+        method: 'DELETE',
+        body: { filmId: parseInt(movieId) },
+      })
+    } else {
+      await $fetch('/api/watchlist', {
+        method: 'POST',
+        body: { filmId: parseInt(movieId) },
+      })
+    }
+    await refreshWatchlist()
+  } catch (e) {
+    console.error('Erreur lors de la gestion de la watchlist', e)
+  } finally {
+    togglingWatchlist.value = false
+  }
+}
+
 // Charger l'avis existant de l'utilisateur pour ce film
 const { data: userAvis, refresh: refreshUserAvis } = await useFetch<{ Note: string; Commentaire: string | null } | null>(
   `/api/avis/user/${movieId}`,
@@ -283,13 +350,25 @@ onUnmounted(() => {
 
             <!-- Boutons d'action -->
             <div class="mt-7 flex flex-wrap gap-4">
-              <button class="glass glass-btn glass-red text-white flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.644C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                Ajouter à la Watchlist
+              <button 
+                @click="toggleWatchlist"
+                :disabled="togglingWatchlist"
+                :class="watchlistStatus?.isInWatchlist ? 'glass-active' : ''"
+                class="glass glass-btn glass-red text-white flex items-center gap-2 disabled:opacity-50"
+              >
+                <svg v-if="watchlistStatus?.isInWatchlist" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M2.036 12.322a1.012 1.012 0 010-.644C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M2.036 12.322a1.012 1.012 0 010-.644C3.423 7.51 7.36 4.5 12 4.5c4.638 0 8.573 3.007 9.963 7.178.07.207.07.431 0 .639C20.577 16.49 16.64 19.5 12 19.5c-4.638 0-8.573-3.007-9.963-7.178z"/><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                {{ watchlistStatus?.isInWatchlist ? 'Dans la Watchlist' : 'Ajouter à la Watchlist' }}
               </button>
-              <button class="glass glass-btn glass-red text-white flex items-center gap-2">
-                <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg>
-                Ajouter aux Favoris
+              <button 
+                @click="toggleFavoris"
+                :disabled="togglingFavoris"
+                :class="favorisStatus?.isFavorite ? 'glass-active' : ''"
+                class="glass glass-btn glass-red text-white flex items-center gap-2 disabled:opacity-50"
+              >
+                <svg v-if="favorisStatus?.isFavorite" xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg>
+                <svg v-else xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12z"/></svg>
+                {{ favorisStatus?.isFavorite ? 'Dans les Favoris' : 'Ajouter aux Favoris' }}
               </button>
             </div>
           </div>
@@ -563,6 +642,12 @@ onUnmounted(() => {
 
 /* Transition expand */
 .expand-enter-active,
+
+/* État actif pour les boutons favoris/watchlist */
+.glass-active {
+  background: rgba(239, 68, 68, 0.25) !important;
+  border-color: rgba(239, 68, 68, 0.4) !important;
+}
 .expand-leave-active {
   transition: all 350ms ease;
   max-height: 800px;
