@@ -106,13 +106,13 @@ const { data: avisData, refresh: refreshAvis } = await useFetch<AvisDB[]>(`/api/
 })
 
 // ── Favoris et Watchlist ──
-const { data: favorisStatus, refresh: refreshFavoris } = await useFetch<{ isFavorite: boolean }>(
+const { data: favorisStatus, refresh: refreshFavoris } = useFetch<{ isFavorite: boolean }>(
   `/api/favoris/${movieId}`,
-  { default: () => ({ isFavorite: false }) }
+  { default: () => ({ isFavorite: false }), server: false }
 )
-const { data: watchlistStatus, refresh: refreshWatchlist } = await useFetch<{ isInWatchlist: boolean }>(
+const { data: watchlistStatus, refresh: refreshWatchlist } = useFetch<{ isInWatchlist: boolean }>(
   `/api/watchlist/${movieId}`,
-  { default: () => ({ isInWatchlist: false }) }
+  { default: () => ({ isInWatchlist: false }), server: false }
 )
 
 const togglingFavoris = ref(false)
@@ -127,9 +127,8 @@ async function toggleFavoris() {
   togglingFavoris.value = true
   try {
     if (favorisStatus.value?.isFavorite) {
-      await $fetch('/api/favoris', {
+      await $fetch(`/api/favoris?filmId=${parseInt(movieId)}`, {
         method: 'DELETE',
-        body: { filmId: parseInt(movieId) },
       })
     } else {
       await $fetch('/api/favoris', {
@@ -154,9 +153,8 @@ async function toggleWatchlist() {
   togglingWatchlist.value = true
   try {
     if (watchlistStatus.value?.isInWatchlist) {
-      await $fetch('/api/watchlist', {
+      await $fetch(`/api/watchlist?filmId=${parseInt(movieId)}`, {
         method: 'DELETE',
-        body: { filmId: parseInt(movieId) },
       })
     } else {
       await $fetch('/api/watchlist', {
