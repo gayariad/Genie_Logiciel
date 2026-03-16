@@ -9,6 +9,7 @@ export default defineEventHandler(async (event) => {
   const timeWindow = getQuery(event).time_window === "week" ? "week" : "day"
 
   const data = await $fetch(`https://api.themoviedb.org/3/trending/movie/${timeWindow}`, {
+    params: { language: 'fr-FR' },
     headers: {
       Authorization: `Bearer ${token}`,
       Accept: "application/json",

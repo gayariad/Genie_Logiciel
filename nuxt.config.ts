@@ -20,6 +20,9 @@ export default defineNuxtConfig({
     TMDB_API_READ_TOKEN: process.env.TMDB_API_READ_TOKEN,
     session: {
       maxAge: 60 * 60 * 24 * 7, // 7 days
+      cookie: {
+        secure: false,
+      },
     },
     db: {
       host: process.env.DB_HOST || 'db',
