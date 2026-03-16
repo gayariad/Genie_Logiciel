@@ -24,3 +24,9 @@ logs
 !.env.example
 docker-compose.dev.yml
 nuxt.config.ts
+
+# Documentation technique
+DOCUMENTATION_TECHNIQUE.md
+
+# Claude
+.claude/

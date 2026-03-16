@@ -33,9 +33,12 @@ interface TMDBMovie {
 }
 
 const route = useRoute()
-const movieId = route.params.id as string
+const movieId = computed(() => route.params.id as string)
 
-const { data: movie, pending, error } = await useFetch<TMDBMovie>(`/api/tmdb/movie/${movieId}`)
+const { data: movie, pending, error } = await useFetch<TMDBMovie>(
+  () => `/api/tmdb/movie/${movieId.value}`,
+  { watch: [movieId] }
+)
 
 // ── Image helpers ──
 function backdropUrl(path: string | null, size = 'original') {
@@ -101,18 +104,19 @@ interface AvisDB {
 const commentText = ref('')
 const submitting = ref(false)
 
-const { data: avisData, refresh: refreshAvis } = await useFetch<AvisDB[]>(`/api/avis/${movieId}`, {
-  default: () => [],
-})
+const { data: avisData, refresh: refreshAvis } = await useFetch<AvisDB[]>(
+  () => `/api/avis/${movieId.value}`,
+  { default: () => [], watch: [movieId] }
+)
 
 // ── Favoris et Watchlist ──
 const { data: favorisStatus, refresh: refreshFavoris } = useFetch<{ isFavorite: boolean }>(
-  `/api/favoris/${movieId}`,
-  { default: () => ({ isFavorite: false }), server: false }
+  () => `/api/favoris/${movieId.value}`,
+  { default: () => ({ isFavorite: false }), server: false, watch: [movieId] }
 )
 const { data: watchlistStatus, refresh: refreshWatchlist } = useFetch<{ isInWatchlist: boolean }>(
-  `/api/watchlist/${movieId}`,
-  { default: () => ({ isInWatchlist: false }), server: false }
+  () => `/api/watchlist/${movieId.value}`,
+  { default: () => ({ isInWatchlist: false }), server: false, watch: [movieId] }
 )
 
 const togglingFavoris = ref(false)
@@ -127,13 +131,13 @@ async function toggleFavoris() {
   togglingFavoris.value = true
   try {
     if (favorisStatus.value?.isFavorite) {
-      await $fetch(`/api/favoris?filmId=${parseInt(movieId)}`, {
+      await $fetch(`/api/favoris?filmId=${parseInt(movieId.value)}`, {
         method: 'DELETE',
       })
     } else {
       await $fetch('/api/favoris', {
         method: 'POST',
-        body: { filmId: parseInt(movieId) },
+        body: { filmId: parseInt(movieId.value) },
       })
     }
     await refreshFavoris()
@@ -153,13 +157,13 @@ async function toggleWatchlist() {
   togglingWatchlist.value = true
   try {
     if (watchlistStatus.value?.isInWatchlist) {
-      await $fetch(`/api/watchlist?filmId=${parseInt(movieId)}`, {
+      await $fetch(`/api/watchlist?filmId=${parseInt(movieId.value)}`, {
         method: 'DELETE',
       })
     } else {
       await $fetch('/api/watchlist', {
         method: 'POST',
-        body: { filmId: parseInt(movieId) },
+        body: { filmId: parseInt(movieId.value) },
       })
     }
     await refreshWatchlist()
@@ -172,8 +176,8 @@ async function toggleWatchlist() {
 
 // Charger l'avis existant de l'utilisateur pour ce film
 const { data: userAvis, refresh: refreshUserAvis } = await useFetch<{ Note: string; Commentaire: string | null } | null>(
-  `/api/avis/user/${movieId}`,
-  { default: () => null }
+  () => `/api/avis/user/${movieId.value}`,
+  { default: () => null, watch: [movieId] }
 )
 
 // Initialiser la note utilisateur si un avis existe
@@ -195,7 +199,7 @@ async function submitAvis() {
     await $fetch('/api/avis', {
       method: 'POST',
       body: {
-        filmId: parseInt(movieId),
+        filmId: parseInt(movieId.value),
         note: userRating.value.toString(),
         commentaire: commentText.value.trim() || null,
       },
