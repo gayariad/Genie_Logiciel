@@ -198,7 +198,10 @@ watch(
           </button>
 
           <!-- Content -->
-          <div class="relative z-10 flex flex-col justify-end h-full px-12 pb-10 max-w-5xl ml-auto text-right">
+          <NuxtLink
+            :to="`/movie/${currentHero?.id}`"
+            class="relative z-10 flex flex-col justify-end h-full px-12 pb-10 max-w-5xl ml-auto text-right cursor-pointer"
+          >
             <Transition name="hero-slide" mode="out-in">
               <div :key="currentHeroIndex">
                 <h1
@@ -212,14 +215,7 @@ watch(
                 </p>
               </div>
             </Transition>
-
-            <NuxtLink
-              :to="`/movie/${currentHero?.id}`"
-              class="mt-5 self-end glass glass-btn glass-red text-white inline-block"
-            >
-              Voir les détails
-            </NuxtLink>
-          </div>
+          </NuxtLink>
 
           <!-- Carousel indicators -->
           <div class="absolute bottom-5 left-1/2 -translate-x-1/2 z-20 flex gap-2">

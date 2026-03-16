@@ -13,7 +13,7 @@ const { data: favoris, pending, error, refresh } = await useFetch('/api/favoris'
 
 function tmdbImg(movie: any) {
   const path = movie?.poster_path || movie?.backdrop_path
-  return path ? `https://image.tmdb.org/t/p/w500${path}` : 'https://via.placeholder.com/500x750?text=No+Image'
+  return path ? `https://image.tmdb.org/t/p/w500${path}` : 'https://placehold.co/500x750?text=No+Image'
 }
 
 async function toggleFavori(idFilm: number) {
