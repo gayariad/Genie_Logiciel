@@ -1,44 +1,52 @@
 <template>
-  <div class="min-h-screen bg-[#1a0000] text-white">
-    <div class="sticky top-0 z-10 bg-black/80 backdrop-blur-sm border-b border-white/10">
-      <div class="max-w-7xl mx-auto px-8 py-6">
-        <div class="flex flex-col lg:flex-row lg:items-center gap-4">
-          <!-- Barre de recherche -->
-          <div class="flex-1 max-w-2xl">
-            <div class="relative">
-              <input
-                v-model="searchQuery"
-                @input="debouncedSearch"
-                type="text"
-                placeholder="Rechercher des films..."
-                class="w-full px-4 py-3 pl-12 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/60 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
-              >
-              <svg xmlns="http://www.w3.org/2000/svg" class="absolute left-3 top-3.5 w-5 h-5 text-white/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-              </svg>
-            </div>
-          </div>
+  <div class="min-h-full text-white">
+    <!-- Barre Spotlight flottante -->
+    <div class="sticky top-6 z-10 px-8">
+      <div class="max-w-2xl mx-auto flex flex-col gap-2">
 
-          <!-- Bouton de filtres -->
-          <div class="relative">
+        <!-- Pill principale — même style que la sidebar -->
+        <div
+          class="flex items-center gap-3 px-5 py-3.5 rounded-full"
+          style="background: rgba(30,5,5,0.45); border: 1px solid rgba(255,255,255,0.2); -webkit-backdrop-filter: blur(20px) saturate(1.6); backdrop-filter: blur(20px) saturate(1.6); box-shadow: inset 0 1px 2px rgba(255,255,255,0.2), inset 0 -1px 1px rgba(255,255,255,0.05), 0 12px 48px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.08);"
+        >
+          <!-- Icône loupe -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white/50 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+          </svg>
+
+          <!-- Input transparent dans la pill -->
+          <input
+            v-model="searchQuery"
+            @input="debouncedSearch"
+            type="text"
+            placeholder="Rechercher des films..."
+            class="flex-1 bg-transparent border-none outline-none text-white text-base font-light placeholder-white/40 focus:outline-none"
+          >
+
+          <!-- Séparateur vertical -->
+          <div class="w-px h-5 bg-white/20 shrink-0" />
+
+          <!-- Bouton Filtres inline -->
+          <div class="relative shrink-0">
             <button
               @click="showFilters = !showFilters"
-              class="filter-button flex items-center gap-2 px-4 py-3 bg-white/10 border border-white/20 rounded-lg text-white hover:bg-white/20 transition-colors relative"
+              class="filter-button flex items-center gap-1.5 text-white/60 hover:text-white transition-colors text-sm relative"
             >
-              <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
               </svg>
-              <span class="hidden sm:inline">Filtres</span>
-              <svg xmlns="http://www.w3.org/2000/svg" :class="['w-4 h-4 transition-transform', showFilters ? 'rotate-180' : '']" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <span>Filtres</span>
+              <svg xmlns="http://www.w3.org/2000/svg" :class="['w-3.5 h-3.5 transition-transform', showFilters ? 'rotate-180' : '']" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
               </svg>
-              <div v-if="hasActiveFilters" class="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></div>
+              <div v-if="hasActiveFilters" class="absolute -top-1 -right-1 w-2 h-2 bg-red-500 rounded-full" />
             </button>
 
             <!-- Déroulant des filtres -->
             <div
               v-if="showFilters"
-              class="filter-dropdown absolute top-full mt-2 right-0 z-20 w-80 bg-black/95 backdrop-blur-sm border border-white/20 rounded-lg p-4 shadow-xl"
+              class="filter-dropdown absolute top-full mt-3 right-0 z-20 w-80 rounded-2xl p-4"
+              style="background: rgba(20,3,3,0.8); border: 1px solid rgba(255,255,255,0.14); -webkit-backdrop-filter: blur(40px) saturate(1.8); backdrop-filter: blur(40px) saturate(1.8); box-shadow: inset 0 1px 1px rgba(255,255,255,0.12), 0 24px 64px rgba(0,0,0,0.5);"
             >
               <div class="space-y-4">
                 <!-- Genres -->
@@ -46,7 +54,7 @@
                   <label class="block text-sm text-white/80 mb-2">Genre</label>
                   <select
                     v-model="selectedGenres"
-                    class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded text-white text-sm"
+                    class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-white text-sm"
                   >
                     <option value="">Tous les genres</option>
                     <option v-for="genre in genres" :key="genre.id" :value="genre.id.toString()" class="text-black bg-white">
@@ -60,7 +68,7 @@
                   <label class="block text-sm text-white/80 mb-2">Année</label>
                   <select
                     v-model="selectedYear"
-                    class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded text-white text-sm"
+                    class="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-xl text-white text-sm"
                   >
                     <option value="" class="text-black bg-white">Toutes</option>
                     <option v-for="year in years" :key="year" :value="year" class="text-black bg-white">{{ year }}</option>
@@ -84,7 +92,7 @@
                 <button
                   @click="applyFilters"
                   :disabled="!canApplyFilters"
-                  class="w-full px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-lg transition-colors font-medium"
+                  class="w-full px-4 py-2 bg-red-600 hover:bg-red-700 disabled:bg-gray-600 disabled:cursor-not-allowed text-white rounded-full transition-colors font-medium"
                 >
                   Appliquer les filtres
                 </button>
@@ -92,7 +100,7 @@
                 <!-- Bouton "Annuler les filtres" -->
                 <button
                   @click="cancelFilters"
-                  class="w-full px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors font-medium"
+                  class="w-full px-4 py-2 bg-white/10 hover:bg-white/15 text-white rounded-full transition-colors font-medium"
                 >
                   Annuler les filtres
                 </button>
@@ -101,13 +109,15 @@
           </div>
         </div>
 
-        <div class="mt-4 text-sm text-white/60">
+        <!-- Compteur de résultats sous la pill -->
+        <p class="text-center text-xs text-white/40">
           {{ displayCount }} résultat{{ displayCount !== 1 ? 's' : '' }}
-        </div>
+        </p>
+
       </div>
     </div>
 
-    <div class="max-w-7xl mx-auto px-8 py-8">
+    <div class="max-w-7xl mx-auto px-8 pt-8 pb-8">
       <div v-if="loading" class="flex justify-center py-12">
         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500"></div>
       </div>
