@@ -22,3 +22,4 @@ jobs:
             npm run build
             pm2 reload cinema-bi || (PORT=3000 pm2 start .output/server/index.mjs --name cinema-bi --interpreter node)
             pm2 save
+            sudo systemctl restart cinema-bi
