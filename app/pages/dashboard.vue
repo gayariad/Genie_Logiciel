@@ -505,6 +505,8 @@ function posterImg(item: any) {
             <div v-else class="text-white/30 text-sm">Aucun film trouvé.</div>
           </div>
         </div>
+        <!-- Sentinel snap point at the bottom so snap-mandatory doesn't bounce back up -->
+        <div class="snap-start h-0" aria-hidden="true" />
       </section>
     </template>
   </div>
