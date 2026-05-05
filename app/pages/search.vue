@@ -361,6 +361,14 @@ const debouncedSearch = () => {
 
 // Chargement
 onMounted(async () => {
+  const route = useRoute()
+  const genreParam = route.query.genres as string | undefined
+  if (genreParam) {
+    selectedGenres.value = genreParam
+    currentMode.value = 'discover'
+    filtersApplied.value = true
+  }
+
   await Promise.all([loadGenres(), loadResults()])
   
   // Ferme le menu déroulant des filtres lorsqu'on clique en dehors

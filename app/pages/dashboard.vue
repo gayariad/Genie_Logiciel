@@ -137,6 +137,61 @@ watch(
   },
   { immediate: true },
 );
+
+// ---- Genres carousels ----
+const GENRE_PICKS = [
+  { id: 28,  name: 'Action' },
+  { id: 35,  name: 'Comédie' },
+  { id: 18,  name: 'Drame' },
+  { id: 27,  name: 'Horreur' },
+  { id: 878, name: 'Science-Fiction' },
+  { id: 10749, name: 'Romance' },
+  { id: 16,  name: 'Animation' },
+  { id: 53,  name: 'Thriller' },
+]
+
+const genreFilms = ref<Record<number, any[]>>({})
+const genreLoading = ref<Record<number, boolean>>({})
+
+async function loadGenre(genreId: number) {
+  if (genreFilms.value[genreId] || genreLoading.value[genreId]) return
+  genreLoading.value[genreId] = true
+  try {
+    const data: any = await $fetch('/api/search/discover', {
+      params: { genres: genreId, page: 1 },
+    })
+    genreFilms.value[genreId] = (data?.results ?? []).slice(0, 15)
+  } finally {
+    genreLoading.value[genreId] = false
+  }
+}
+
+const genreSectionRef = ref<HTMLElement | null>(null)
+let genreObserver: IntersectionObserver | null = null
+
+onMounted(() => {
+  if (genreSectionRef.value) {
+    genreObserver = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          GENRE_PICKS.forEach(g => loadGenre(g.id))
+          genreObserver?.disconnect()
+        }
+      },
+      { threshold: 0.05 },
+    )
+    genreObserver.observe(genreSectionRef.value)
+  }
+})
+
+onUnmounted(() => {
+  genreObserver?.disconnect()
+})
+
+function posterImg(item: any) {
+  if (!item?.poster_path) return null
+  return `https://image.tmdb.org/t/p/w342${item.poster_path}`
+}
 </script>
 
 <template>
@@ -322,7 +377,7 @@ watch(
               <p
                 class="text-white/60 text-base leading-relaxed max-w-md mx-auto"
               >
-                Budgets, recettes, genres, réalisateurs — plongez dans les
+                Budgets, recettes, genres, réalisateurs plongez dans les
                 coulisses de l'industrie cinématographique grâce à des analyses
                 interactives.
               </p>
@@ -372,6 +427,87 @@ watch(
           </div>
         </div>
       </section>
+      <!-- Genres Carousels -->
+      <section
+        ref="genreSectionRef"
+        class="snap-start py-10 mt-8"
+      >
+        <div class="flex items-center gap-3 mb-8">
+          <div class="w-10 h-10 rounded-2xl glass glass-red flex items-center justify-center shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z" />
+            </svg>
+          </div>
+          <div>
+            <h2 class="text-2xl font-extrabold tracking-tight text-white">Films par catégorie</h2>
+            <p class="text-white/40 text-sm mt-0.5">Explorez les genres qui vous correspondent</p>
+          </div>
+        </div>
+
+        <div class="genres-container flex flex-col gap-10">
+          <div v-for="genre in GENRE_PICKS" :key="genre.id" class="genre-row-snap">
+            <!-- Genre label -->
+            <div class="flex items-center gap-3 mb-4">
+              <h3 class="text-lg font-bold text-white">{{ genre.name }}</h3>
+              <div class="flex-1 h-px bg-white/10" />
+              <NuxtLink
+                :to="`/search?genres=${genre.id}`"
+                class="text-xs text-white/40 hover:text-white/70 transition-colors"
+              >Voir tout →</NuxtLink>
+            </div>
+
+            <!-- Loading skeleton -->
+            <div v-if="genreLoading[genre.id]" class="flex gap-4 overflow-hidden">
+              <div
+                v-for="n in 8" :key="n"
+                class="genre-card-skeleton glass glass-red shrink-0 w-36 h-52 rounded-2xl animate-pulse"
+              />
+            </div>
+
+            <!-- Horizontal scroll row -->
+            <div
+              v-else-if="genreFilms[genre.id]?.length"
+              class="genre-row flex gap-4 overflow-x-auto pb-2"
+            >
+              <div
+                v-for="film in genreFilms[genre.id]"
+                :key="film.id"
+                class="shrink-0 w-36 flex flex-col gap-1.5"
+              >
+                <NuxtLink
+                  :to="`/movie/${film.id}`"
+                  class="genre-card w-36 h-52 rounded-2xl overflow-hidden relative group/card glass glass-red block"
+                >
+                  <img
+                    v-if="posterImg(film)"
+                    :src="posterImg(film)!"
+                    :alt="film.title"
+                    class="absolute inset-0 w-full h-full object-cover group-hover/card:scale-105 transition-transform duration-500"
+                  />
+                  <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/10 to-transparent" />
+                  <div class="absolute bottom-0 left-0 right-0 p-3">
+                    <p class="text-white text-xs font-semibold leading-tight line-clamp-2">{{ film.title }}</p>
+                    <p v-if="film.release_date" class="text-white/50 text-[10px] mt-0.5">
+                      {{ film.release_date.slice(0, 4) }}
+                    </p>
+                  </div>
+                </NuxtLink>
+                <!-- Rating below card -->
+                <div v-if="film.vote_average" class="flex items-center gap-1 px-0.5">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="w-3 h-3 text-yellow-400 shrink-0" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+                  </svg>
+                  <span class="text-white text-[11px] font-semibold">{{ film.vote_average.toFixed(1) }}</span>
+                </div>
+              </div>
+            </div>
+
+            <div v-else class="text-white/30 text-sm">Aucun film trouvé.</div>
+          </div>
+        </div>
+        <!-- Sentinel snap point at the bottom so snap-mandatory doesn't bounce back up -->
+        <div class="snap-start h-0" aria-hidden="true" />
+      </section>
     </template>
   </div>
 </template>
@@ -393,5 +529,20 @@ watch(
 .hero-slide-leave-to {
   opacity: 0;
   transform: translateY(-12px);
+}
+
+/* Genre carousels */
+.genres-container {
+  scroll-snap-type: y proximity;
+  overflow-y: auto;
+}
+.genre-row-snap {
+  scroll-snap-align: start;
+}
+.genre-row {
+  scrollbar-width: none;
+}
+.genre-row::-webkit-scrollbar {
+  display: none;
 }
 </style>
