@@ -19,6 +19,7 @@ interface TMDBMovie {
   runtime: number | null
   vote_average: number
   vote_count: number
+  popularity: number
   budget: number
   revenue: number
   original_language: string
@@ -217,6 +218,21 @@ async function submitAvis() {
 function formatAvisDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
 }
+
+// ── Stats communauté ──
+const communityAvg = computed(() => {
+  const avis = avisData.value as AvisDB[]
+  if (!avis?.length) return null
+  const sum = avis.reduce((acc, a) => acc + parseFloat(a.Note), 0)
+  return Math.round((sum / avis.length) * 10) / 10
+})
+
+const boxOfficeRatio = computed(() => {
+  const b = movie.value?.budget ?? 0
+  const r = movie.value?.revenue ?? 0
+  if (!b || !r) return null
+  return Math.round((r / b) * 10) / 10
+})
 
 // ── Expandable details ──
 const detailsOpen = ref(false)
@@ -446,6 +462,116 @@ onUnmounted(() => {
               </div>
               <p v-if="avis.Commentaire" class="text-white/55 text-sm leading-relaxed">{{ avis.Commentaire }}</p>
               <p v-else class="text-white/20 text-xs italic">Note sans commentaire</p>
+            </div>
+          </div>
+
+          <!-- ── KPI ── -->
+          <div class="mt-12">
+            <h2 class="text-xl font-bold text-white mb-5 tracking-wide">Indicateurs clés</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+
+              <!-- KPI 1 : Verdict communauté -->
+              <div class="glass glass-panel glass-red p-5 flex flex-col gap-3">
+                <p class="text-[10px] font-bold text-white/35 uppercase tracking-widest">Verdict communauté</p>
+                <div v-if="communityAvg !== null">
+                  <div class="flex items-end gap-2 mb-1">
+                    <span class="text-4xl font-extrabold text-white leading-none">{{ communityAvg }}</span>
+                    <span class="text-white/30 text-sm mb-1">/ 5</span>
+                    <span
+                      v-if="movie?.vote_average"
+                      :class="communityAvg - movie.vote_average / 2 >= 0 ? 'text-emerald-400' : 'text-red-400'"
+                      class="text-xs font-semibold mb-1.5 ml-auto"
+                    >
+                      {{ communityAvg - movie.vote_average / 2 >= 0 ? '▲' : '▼' }}
+                      {{ Math.abs(Math.round((communityAvg - movie.vote_average / 2) * 10) / 10).toFixed(1) }}
+                      vs TMDB
+                    </span>
+                  </div>
+                  <div class="flex items-center gap-2 mb-1.5">
+                    <span class="text-[10px] text-white/35 w-12 shrink-0">Nous</span>
+                    <div class="flex-1 h-2 bg-white/8 rounded-full overflow-hidden">
+                      <div class="h-full bg-red-500 rounded-full transition-all duration-700" :style="{ width: ((communityAvg / 5) * 100).toFixed(1) + '%' }" />
+                    </div>
+                    <span class="text-[10px] text-white/40 w-7 text-right">{{ ((communityAvg / 5) * 100).toFixed(0) }}%</span>
+                  </div>
+                  <div v-if="movie?.vote_average" class="flex items-center gap-2">
+                    <span class="text-[10px] text-white/35 w-12 shrink-0">TMDB</span>
+                    <div class="flex-1 h-2 bg-white/8 rounded-full overflow-hidden">
+                      <div class="h-full bg-white/30 rounded-full transition-all duration-700" :style="{ width: (movie.vote_average * 10).toFixed(1) + '%' }" />
+                    </div>
+                    <span class="text-[10px] text-white/40 w-7 text-right">{{ (movie.vote_average * 10).toFixed(0) }}%</span>
+                  </div>
+                  <p class="text-white/25 text-[11px] mt-2.5">Basé sur {{ (avisData as AvisDB[]).length }} avis</p>
+                </div>
+                <div v-else class="text-white/25 text-sm italic flex-1 flex items-center">Soyez le premier à noter !</div>
+              </div>
+
+              <!-- KPI 2 : Performance box-office -->
+              <div class="glass glass-panel glass-red p-5 flex flex-col gap-3">
+                <p class="text-[10px] font-bold text-white/35 uppercase tracking-widest">Box-office</p>
+                <div v-if="movie?.revenue">
+                  <div class="flex items-end gap-1 mb-0.5">
+                    <span
+                      :class="boxOfficeRatio !== null && boxOfficeRatio >= 3 ? 'text-emerald-400' : boxOfficeRatio !== null && boxOfficeRatio >= 1 ? 'text-yellow-400' : 'text-red-400'"
+                      class="text-4xl font-extrabold leading-none"
+                    >{{ boxOfficeRatio !== null ? '×' + boxOfficeRatio.toFixed(1) : '—' }}</span>
+                  </div>
+                  <p class="text-white/40 text-xs font-semibold mb-3">
+                    {{ boxOfficeRatio === null ? 'Budget inconnu' : boxOfficeRatio >= 3 ? 'Succès commercial' : boxOfficeRatio >= 1 ? 'Rentable' : 'Flop' }}
+                  </p>
+                  <div v-if="boxOfficeRatio !== null" class="mb-3">
+                    <div class="h-2.5 bg-white/8 rounded-full overflow-hidden">
+                      <div
+                        :class="boxOfficeRatio >= 3 ? 'bg-emerald-500' : boxOfficeRatio >= 1 ? 'bg-yellow-400' : 'bg-red-500'"
+                        class="h-full rounded-full transition-all duration-700"
+                        :style="{ width: Math.min((boxOfficeRatio / 5) * 100, 100).toFixed(1) + '%' }"
+                      />
+                    </div>
+                    <div class="flex justify-between mt-0.5">
+                      <span class="text-[10px] text-white/20">×0</span>
+                      <span class="text-[10px] text-white/20">×5</span>
+                    </div>
+                  </div>
+                  <div class="space-y-0.5 text-[11px]">
+                    <div v-if="movie?.budget" class="flex justify-between"><span class="text-white/30">Budget</span><span class="text-white/50">{{ formatMoney(movie.budget) }}</span></div>
+                    <div class="flex justify-between"><span class="text-white/30">Recettes</span><span class="text-white/50">{{ formatMoney(movie.revenue) }}</span></div>
+                  </div>
+                </div>
+                <div v-else class="text-white/25 text-sm italic flex-1 flex items-center">Données indisponibles</div>
+              </div>
+
+              <!-- KPI 3 : Popularité TMDB -->
+              <div class="glass glass-panel glass-red p-5 flex flex-col gap-3">
+                <p class="text-[10px] font-bold text-white/35 uppercase tracking-widest">Popularité TMDB</p>
+                <div v-if="movie?.popularity">
+                  <div class="flex items-end gap-2 mb-0.5">
+                    <span class="text-4xl font-extrabold text-white leading-none">{{ Math.round(movie.popularity) }}</span>
+                    <span class="text-white/30 text-sm mb-1">pts</span>
+                  </div>
+                  <span
+                    :class="movie.popularity >= 200 ? 'text-emerald-400' : movie.popularity >= 50 ? 'text-blue-400' : movie.popularity >= 20 ? 'text-yellow-400' : movie.popularity >= 5 ? 'text-orange-400' : 'text-white/35'"
+                    class="text-xs font-bold uppercase tracking-wide"
+                  >{{ movie.popularity >= 200 ? 'Tendance' : movie.popularity >= 50 ? 'Très populaire' : movie.popularity >= 20 ? 'Populaire' : movie.popularity >= 5 ? 'Modéré' : 'Discret' }}</span>
+                  <div class="mt-3 mb-1">
+                    <div class="h-2.5 bg-white/8 rounded-full overflow-hidden">
+                      <div
+                        :class="movie.popularity >= 200 ? 'bg-emerald-500' : movie.popularity >= 50 ? 'bg-blue-500' : movie.popularity >= 20 ? 'bg-yellow-400' : movie.popularity >= 5 ? 'bg-orange-400' : 'bg-white/25'"
+                        class="h-full rounded-full transition-all duration-700"
+                        :style="{ width: Math.min((movie.popularity / 300) * 100, 100).toFixed(1) + '%' }"
+                      />
+                    </div>
+                  </div>
+                  <p class="text-white/25 text-[11px] mb-2">
+                    {{ movie.popularity >= 200 ? 'Ce film fait actuellement le buzz sur TMDB.' : movie.popularity >= 50 ? 'Ce film est très recherché en ce moment.' : movie.popularity >= 20 ? 'Ce film attire un bon trafic sur TMDB.' : movie.popularity >= 5 ? 'Ce film génère un intérêt modéré.' : 'Ce film est peu consulté sur TMDB.' }}
+                  </p>
+                  <div class="space-y-0.5 text-[11px]">
+                    <div v-if="movie?.vote_average" class="flex justify-between"><span class="text-white/30">Note TMDB</span><span class="text-white/50">{{ movie.vote_average.toFixed(1) }}/10</span></div>
+                    <div v-if="movie?.runtime" class="flex justify-between"><span class="text-white/30">Durée</span><span class="text-white/50">{{ formatRuntime(movie.runtime) }}</span></div>
+                  </div>
+                </div>
+                <div v-else class="text-white/25 text-sm italic flex-1 flex items-center">Données indisponibles</div>
+              </div>
+
             </div>
           </div>
         </div>
