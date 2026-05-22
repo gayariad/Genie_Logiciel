@@ -1,75 +1,72 @@
-# Nuxt Minimal Starter
+# Genie_Logiciel – Cinema BI
 
-Look at the [Nuxt documentation](https://nuxt.com/docs/getting-started/introduction) to learn more.
+Ce projet est une application web de Business Intelligence (BI) dédiée à l'analyse et la gestion des données d'un cinéma. Il s'appuie sur Nuxt, intègre Chart.js pour la visualisation de données, et utilise une base de données MySQL. Des outils d'authentification sécurisée et une API backend sont inclus.
 
-## Setup
+## Table des matières
 
-Make sure to install dependencies:
+- [Fonctionnalités](#fonctionnalités)
+- [Architecture](#architecture-du-projet)
+- [Installation](#installation)
+- [Configuration](#configuration)
+- [Déploiement](#déploiement)
+- [Aperçu](#aperçu)
+- [Ressources](#ressources)
+- [Licence](#licence)
 
-```bash
-# npm
-npm install
+## Fonctionnalités
 
-# pnpm
-pnpm install
+- Tableau de bord de statistiques cinéma (fréquentation, recettes, etc.)
+- Visualisation interactive via Chart.js, Vue Chart.js
+- Authentification utilisateur sécurisée (nuxt-auth-utils, bcryptjs)
+- API backend (Node.js)
+- Support de Docker pour le développement
+- Scripts et schéma SQL (`cinemaBI.sql`)
+- Configuration partagée (dossier `shared`)
 
-# yarn
-yarn install
+## Architecture du projet
 
-# bun
-bun install
+```
+.
+├── app/                # Frontend Nuxt
+├── server/             # Backend/api Node.js
+├── shared/             # Types et modules partagés
+├── public/             # Assets statiques
+├── cinemaBI.sql        # Schéma de base de données
+├── Dockerfile.dev
+├── docker-compose.dev.yml
+├── nuxt.config.ts
+├── package.json
+├── Rapport_genie_logiciel.pdf
 ```
 
-## Development Server
+## Installation
 
-Start the development server on `http://localhost:3000`:
+1. Cloner le dépôt et installer les dépendances (`npm install`, `yarn`, ou autre).
+2. Importer le schéma de base de données depuis `cinemaBI.sql` si besoin.
 
-```bash
-# npm
-npm run dev
+## Configuration
 
-# pnpm
-pnpm dev
+- Voir `nuxt.config.ts` pour les variables d’environnement base de données :
+  - `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`
+- Optionnel : `TMDB_API_READ_TOKEN` (connexion à TheMovieDB)
+- Par défaut, utilisateur : `dev_user`, mot de passe : `dev_pass`
 
-# yarn
-yarn dev
+## Déploiement
 
-# bun
-bun run dev
-```
+Le site est accessible à l'adresse suivante :
 
-## Production
+**http://178.63.252.204/dashboard**
 
-Build the application for production:
+## Aperçu
 
-```bash
-# npm
-npm run build
+![Aperçu de l'application](Home.png)
 
-# pnpm
-pnpm build
+## Ressources
 
-# yarn
-yarn build
+- [Rapport Génie Logiciel (PDF)](Rapport_genie_logiciel.pdf)
+- [Schéma SQL](cinemaBI.sql)
+- [Documentation Nuxt](https://nuxt.com/docs)
+- [Chart.js](https://www.chartjs.org/)
 
-# bun
-bun run build
-```
+## Licence
 
-Locally preview production build:
-
-```bash
-# npm
-npm run preview
-
-# pnpm
-pnpm preview
-
-# yarn
-yarn preview
-
-# bun
-bun run preview
-```
-
-Check out the [deployment documentation](https://nuxt.com/docs/getting-started/deployment) for more information.
